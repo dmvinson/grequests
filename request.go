@@ -463,7 +463,6 @@ func BuildHTTPClient(ro RequestOptions) *http.Client {
 func createHTTPTransport(ro RequestOptions) *http.Transport {
 	ourHTTPTransport := &http.Transport{
 		// These are borrowed from the default transporter
-		Proxy: ro.proxySettings,
 		Dial: (&net.Dialer{
 			Timeout:   ro.DialTimeout,
 			KeepAlive: ro.DialKeepAlive,
@@ -473,6 +472,9 @@ func createHTTPTransport(ro RequestOptions) *http.Transport {
 		// Here comes the user settings
 		TLSClientConfig:    &tls.Config{InsecureSkipVerify: ro.InsecureSkipVerify},
 		DisableCompression: ro.DisableCompression,
+	}
+	if ro.Proxies != nil {
+		ourHTTPTransport.Proxy = http.ProxyURL(ro.Proxies["http"])
 	}
 	EnsureTransporterFinalized(ourHTTPTransport)
 	return ourHTTPTransport
